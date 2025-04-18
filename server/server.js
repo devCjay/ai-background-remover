@@ -9,17 +9,21 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
+
+// 👇 Only use raw parser for Clerk webhooks
+app.use('/api/user/webhooks', express.raw({ type: 'application/json' }));
+
+// 👇 For all other routes, use JSON parser
 app.use(express.json());
 
 // DB Connection
-await connectDB(); // This is now totally fine on Railway
+await connectDB();
 
 // Routes
 app.get('/', (req, res) => res.send('API is running...'));
-app.use('api/user', userRouter); // Use the user router for user-related routes 
-
+app.use('/api/user', userRouter); // ✅ Fixed route path
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });

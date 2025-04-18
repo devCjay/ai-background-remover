@@ -1,70 +1,60 @@
-import { Webhook } from "svix"
+import { Webhook } from "svix";
 import userModel from "../models/userModel.js";
-// API controller function manage claerk user with database 
-// https://localhost:5000/api/user/webhook
 
 const clerkWebhook = async (req, res) => {
-    
-    try {
+  try {
+    const webhook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-        const webhook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+    // ✅ Verify using raw buffer
+    const payload = req.body; // this is a buffer
+    const headers = {
+      "svix-id": req.headers["svix-id"],
+      "svix-signature": req.headers["svix-signature"],
+      "svix-timestamp": req.headers["svix-timestamp"],
+    };
 
-        await webhook.verify(JSON.stringify(req.body),{
-        "svix-id": req.headers['svix-id'],
-        "svix-signature": req.headers['svix-signature'],    
-        "svix-timestamp": req.headers['svix-timestamp'] 
-    });
-        
-    const {data, type} = req.body;
+    const event = webhook.verify(payload, headers);
+    const { data, type } = event;
 
     switch (type) {
-        case 'user.created':{
-             // Handle user creation
-             const userData = {
-                clerkId: data.id,
-                email: data.email_addresses[0].email_address,
-                firstName: data.first_name,
-                lastName: data.last_name,
-                photo: data.profile_image_url,  
-            }
-            await userModel.create(userData);
-            res.json({success: true, message: "User created successfully"});
-            break;
-        }
-           
-        case 'user.updated': {
-             // Handle user update
-            const userData = {
-                email: data.email_addresses[0].email_address,
-                firstName: data.first_name,
-                lastName: data.last_name,
-                photo: data.profile_image_url,
-            }
-            await userModel.findOneAndUpdate({ clerkId: data.id }, userData, { new: true }); 
-            res.json({success: true, message: "User updated successfully"});  
-            break;
-        }   
-           
-        case 'user.deleted':
-            // Handle user deletion
-           await userModel.findOneAndDelete({ clerkId: data.id });
-           res.json({success: true, message: "User deleted successfully"});
-           break;  
+      case "user.created": {
+        const userData = {
+          clerkId: data.id,
+          email: data.email_addresses[0].email_address,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          photo: data.profile_image_url,
+        };
+        await userModel.create(userData);
+        return res.json({ success: true, message: "User created successfully" });
+      }
 
-        default:
-            console.log("Unknown event type:", type);
-            break;
+      case "user.updated": {
+        const userData = {
+          email: data.email_addresses[0].email_address,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          photo: data.profile_image_url,
+        };
+        await userModel.findOneAndUpdate({ clerkId: data.id }, userData, { new: true });
+        return res.json({ success: true, message: "User updated successfully" });
+      }
+
+      case "user.deleted": {
+        await userModel.findOneAndDelete({ clerkId: data.id });
+        return res.json({ success: true, message: "User deleted successfully" });
+      }
+
+      default:
+        console.log("Unhandled Clerk event:", type);
+        break;
     }
-    res.status(200).json({success: true, message: "Webhook verified successfully"});
 
-
-        
-    } catch (error) {
-        console.error("Error verifying webhook:", error);
-       res.json({success: false, error: error.message})
-        
-    }
-}
-
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ Webhook verification failed:", error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
 
 export { clerkWebhook };

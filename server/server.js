@@ -3,23 +3,20 @@ import express from 'express';
 import cors from 'cors';
 import connectDB from './configs/mongodb.js';
 
-
-// APP Config
-const PORT = process.env.PORT || 5000;
 const app = express();
-await connectDB(); // Connect to MongoDB    
+const PORT = process.env.PORT || 5000;
 
-
-// Initialize Middleware
+// Middleware
+app.use(cors());
 app.use(express.json());
-app.use(cors());    
 
+// DB Connection
+await connectDB(); // This is now totally fine on Railway
 
-// API Routes
-app.get('/', (req, res) => res.send('API is running...'));  
+// Routes
+app.get('/', (req, res) => res.send('API is running...'));
 
-app.listen(PORT, () => {        
-  console.log(`Server is running on port ${PORT}`);
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-

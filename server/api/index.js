@@ -1,34 +1,24 @@
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import serverless from 'serverless-http';
+import cors from 'cors';
 import connectDB from '../configs/mongodb.js';
 
 const app = express();
-
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
-
-// DB Connection (inside function scope)
-let isConnected = false;
-
 app.use(async (req, res, next) => {
-  if (!isConnected) {
-    try {
-      await connectDB();
-      isConnected = true;
-    } catch (err) {
-      console.error('MongoDB connection error:', err);
-    }
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    return res.status(500).json({ error: 'Database connection failed' });
   }
-  next();
 });
 
-export default serverless(app); // ✅ this is what Vercel needs
+app.get('/', (req, res) => {
+  res.send('API is working 🎉');
+});
 
+export default serverless(app);

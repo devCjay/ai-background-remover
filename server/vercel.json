@@ -1,0 +1,21 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "srever.js",
+        "use": "@vercel/node",
+        "config": {
+          "includeFiles": [
+            "dist/**"
+          ]
+        }   
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "srever.js"
+      }
+    ]
+  }
+  

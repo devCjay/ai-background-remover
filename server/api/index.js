@@ -30,4 +30,5 @@ app.use(async (req, res, next) => {
   next();
 });
 
-export const handler = serverless(app);
+export default serverless(app); // ✅ this is what Vercel needs
+

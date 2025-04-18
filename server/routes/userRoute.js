@@ -1,7 +1,7 @@
-import exopress from 'express';
+import express from 'express';
 import { clerkWebhook } from '../controllers/userController.js';
 
-const userRouter = exopress.Router();   
+const userRouter = express.Router();   
 
 userRouter.post('/webhooks', clerkWebhook); // Clerk webhook route   
 

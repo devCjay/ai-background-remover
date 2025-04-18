@@ -1,12 +1,16 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const connectDB = async () => {
-    mongoose.connection.on('connected', () => {
-        console.log('Database connected')
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-
-    await mongoose.connect(`${process.env.MONGODB_URI}/ai-background-remover`);
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    throw err;
+  }
 };
 
-
-export default connectDB
+export default connectDB;

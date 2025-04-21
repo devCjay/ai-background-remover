@@ -1,7 +1,45 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { assets } from '../assets/assets'
 import { plans } from '../assets/assets'
+import { AppContext } from '../context/appContext'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@clerk/clerk-react'
+import axios from 'axios'
+
 const BuyCredit = () => {
+
+    const { backendURL, loadCreditsData } = useContext(AppContext)
+    const navigate = useNavigate();
+    const { getToken } = useAuth();
+
+    const paymentPaypalPay = async (planId) => {
+      try {
+        const token = await getToken();
+    
+        const { data } = await axios.post(
+          `${backendURL}/api/user/pay-paypal`,
+          { planId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+    
+        if (data.success && data.approvalUrl) {
+          window.location.href = data.approvalUrl; // ✅ Redirect to PayPal
+        } else {
+          //toast.error("Payment initialization failed.");
+          console.log("Payment initialization failed.");
+        }
+      } catch (error) {
+        console.error("PayPal Init Error:", error);
+        toast.error(error?.response?.data?.message || "Something went wrong.");
+      }
+    };
+
+
   return (
     <div className='min-h-[80vh] text-center pt-14 mb-10'>
 
@@ -20,7 +58,7 @@ const BuyCredit = () => {
             <p className='mt-6'>
               <span className='text-3xl font-medium'>${item.price}</span> / {item.credits} Credits
             </p>
-            <button className='w-full bg-gray-800 text-white mt-8 text-sm rounded-md py-2.5 min-w--52'>Purchase</button>
+            <button onClick={()=>paymentPaypalPay(item.id) } className='w-full bg-gray-800 text-white mt-8 text-sm rounded-md py-2.5 min-w--52'>Purchase</button>
           </div>
         ))
 

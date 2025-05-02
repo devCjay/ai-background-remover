@@ -1,6 +1,8 @@
 import { Webhook } from "svix";
 import userModel from "../models/userModel.js";
 import transactionModel from "../models/transactionModel.js";
+import base64 from "base-64"; 
+
 
 const clerkWebhook = async (req, res) => {
   try {
@@ -134,6 +136,7 @@ const paypalPayment = async (req, res) => {
     });
 
     const accessToken = tokenRes.data.access_token;
+    console.log('accessToken');
 
     // Create PayPal order
     const orderRes = await axios.post(
@@ -149,8 +152,8 @@ const paypalPayment = async (req, res) => {
           },
         ],
         application_context: {
-          return_url: "https://yourapp.com/payment/success",
-          cancel_url: "https://yourapp.com/payment/cancel",
+          return_url: "http://localhost:5173/buy-credit/payment/success",
+          cancel_url: "http://localhost:5173/buy-credit/payment/cancel",
         },
       },
       {
@@ -161,7 +164,7 @@ const paypalPayment = async (req, res) => {
     );
 
     const approvalLink = orderRes.data.links.find(link => link.rel === "approve").href;
-
+    
     return res.json({
       success: true,
       approvalUrl: approvalLink,

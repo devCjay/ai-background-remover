@@ -8,7 +8,8 @@ import axios from 'axios'
 
 const BuyCredit = () => {
 
-    const { backendURL, loadCreditsData } = useContext(AppContext)
+    //const { backendURL, loadCreditsData } = useContext(AppContext)
+    const backendURL = 'http://localhost:5000';
     const navigate = useNavigate();
     const { getToken } = useAuth();
 
@@ -20,9 +21,9 @@ const BuyCredit = () => {
           `${backendURL}/api/user/pay-paypal`,
           { planId },
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+            headers: { token
+              //Authorization: `Bearer ${token}`,
+              //"Content-Type": "application/json",
             },
           }
         );
@@ -58,7 +59,7 @@ const BuyCredit = () => {
             <p className='mt-6'>
               <span className='text-3xl font-medium'>${item.price}</span> / {item.credits} Credits
             </p>
-            <button onClick={()=>paymentPaypalPay(item.id) } className='w-full bg-gray-800 text-white mt-8 text-sm rounded-md py-2.5 min-w--52'>Purchase</button>
+            <button onClick={()=>paymentPaypalPay(item.id)} className='w-full bg-gray-800 text-white mt-8 text-sm rounded-md py-2.5 min-w--52'>Purchase</button>
           </div>
         ))
 
